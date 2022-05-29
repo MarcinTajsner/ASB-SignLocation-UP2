@@ -1,0 +1,7 @@
+path: ../../datasets/yolo
+test: test
+train: train
+val: valid
+
+nc: 11
+names: ['information', 'information_add', 'information_big', 'mandatory', 'priority', 'prohibitory', 'prohibitory_big', 'stop', 'warning', 'warning_add', 'yield']
