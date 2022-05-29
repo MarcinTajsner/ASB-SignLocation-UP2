@@ -11,7 +11,7 @@ CLASSES = get_classes()
 IE = InferenceEngine(
     model_path = "models/openvino/yolov5n6_1280_32_200/yolov5n6_1280_32_200.xml",
     weights_path = "models/openvino/yolov5n6_1280_32_200/yolov5n6_1280_32_200.bin",
-    device = "HDDL",
+    device = "CPU",
     confidence_threshold = 0.5
 )
 
@@ -92,5 +92,5 @@ parser.add_argument("-video_path", default="", metavar="PATH",
                     help="specify path to viedo that should be used for recognition.")
 args = vars(parser.parse_args(["-frame_rate", "3"]))
 args = parser.parse_args()
-#start(args.use_cam, args.frame_rate, args.video_path)
-start()
+start(args.use_cam, args.frame_rate, args.video_path)
+#start()
