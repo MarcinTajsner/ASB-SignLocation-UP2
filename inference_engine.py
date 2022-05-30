@@ -218,15 +218,9 @@ class InferenceEngine:
         return pred_list
 
     def detect_from_frame(self, frame) -> list:
-        s = time.time()
         img = self.__img_preprocessing(frame)
-        print("Preprocessing time: ", time.time() - s)
-        s = time.time()
         pred = self.__predict(img)
-        print("Prediction time: ", time.time() - s)
-        s = time.time()
         pred_list = self.__prediction_postprocessing(pred, img, frame)
-        print("Postprocessing time: ", time.time() - s)
         return pred_list
 
 
