@@ -8,6 +8,7 @@ from time import time, sleep
 
 RESOLUTION_X = 1920
 RESOLUTION_Y = 1080
+FPS = 30
 FOCAL = get_camera_info()["focal_length"]
 CLASSES = get_classes()
 IE = InferenceEngine(
@@ -68,23 +69,31 @@ def single_frame_procces(frame):
     return objects_to_add_to_frame
 
 
-def start(use_camera: bool = False, frame_rate: int = 1, viedo_path: str = 'test_video.mp4', fps: int = 30, save_viedo: bool = True, live_display: bool = False):
+def start(use_camera: bool = False, frame_rate: int = 1, viedo_path: str = 'test_video.mp4', fps: int = 30, save_viedo: bool = False, live_display: bool = True):
     if fps < 0 or fps > 60:
         raise Exception("Fps could be only in range <0;60>")
     if use_camera:
         cap = cv2.VideoCapture(0)
     else:
         cap = cv2.VideoCapture(viedo_path)
+    RESOLUTION_X, RESOLUTION_Y = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(
+        cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     if save_viedo:
         fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
         out = cv2.VideoWriter('output.mp4', fourcc, fps,
-                              (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))))
+                              (RESOLUTION_X, RESOLUTION_Y))
     single_frame_time = 1 / fps
     curr_frame = frame_rate - 1
     objects_to_add_to_frame = []
+    frame_number, skipped_frames = 0, 0
+    FPS = 30
     while cap.isOpened():
         start = time()
+        if frame_number >= fps:
+            FPS = fps - skipped_frames
+            frame_number, skipped_frames = 0, 0
         curr_frame += 1
+        frame_number += 1
         ret, frame = cap.read()
         # if frame is read correctly ret is True
         if not ret:
@@ -95,6 +104,8 @@ def start(use_camera: bool = False, frame_rate: int = 1, viedo_path: str = 'test
             curr_frame = 0
         for obj in objects_to_add_to_frame:
             obj.procces_frame(frame)
+        cv2.putText(frame, f"{FPS} FPS", (RESOLUTION_X - 60, 20),
+                    cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 255), 2, cv2.LINE_AA)
         if save_viedo:
             out.write(frame)
 
@@ -105,6 +116,8 @@ def start(use_camera: bool = False, frame_rate: int = 1, viedo_path: str = 'test
         elif not save_viedo:
             # Skip frames
             to_skip = round(frame_time / single_frame_time)
+            skipped_frames += to_skip
+            frame_number += to_skip
             sleep(to_skip // 2 * single_frame_time)
             for _ in range(to_skip):
                 ret, _ = cap.read()
