@@ -4,4 +4,3 @@ torch
 torchvision
 PyYAML
 attrs
-openvino
